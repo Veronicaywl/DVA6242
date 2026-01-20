@@ -1,0 +1,82 @@
+[
+  {
+    "op": "core/row-removal",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "Common Name",
+          "expression": "isNull(value)",
+          "columnName": "Common Name",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": true,
+                "l": "true"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "description": "Remove rows"
+  },
+  {
+    "op": "core/row-removal",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "text",
+          "name": "Subject",
+          "columnName": "Subject",
+          "query": "Airport",
+          "mode": "text",
+          "caseSensitive": true,
+          "invert": true
+        }
+      ],
+      "mode": "row-based"
+    },
+    "description": "Remove rows"
+  },
+  {
+    "op": "core/column-addition",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "baseColumnName": "Subject",
+    "expression": "grel:value.match(/.*?((?:[A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)\\s+Airport).*/)[0]",
+    "onError": "set-to-blank",
+    "newColumnName": "Airport",
+    "columnInsertIndex": 5,
+    "description": "Create column Airport at index 5 based on column Subject using expression grel:value.match(/.*?((?:[A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)\\s+Airport).*/)[0]"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Airport",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Tan Son Nhat International Airport",
+          "Tan Son Nha International Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Tan Son Nhat International Airport"
+      }
+    ],
+    "description": "Mass edit cells in column Airport"
+  }
+]
