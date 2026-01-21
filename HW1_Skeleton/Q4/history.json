@@ -52,11 +52,51 @@
       "mode": "row-based"
     },
     "baseColumnName": "Subject",
-    "expression": "grel:value.match(/.*?((?:[A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)\\s+Airport).*/)[0]",
+    "expression": "grel:value.match(/.*?((?:[A-Z0-9\\u00C0-\\u00FF][\\w\\u00C0-\\u00FF'.\\-]*\\s*)+Airport).*/)[0]",
     "onError": "set-to-blank",
     "newColumnName": "Airport",
     "columnInsertIndex": 5,
-    "description": "Create column Airport at index 5 based on column Subject using expression grel:value.match(/.*?((?:[A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)\\s+Airport).*/)[0]"
+    "description": "Create column Airport at index 5 based on column Subject using expression grel:value.match(/.*?((?:[A-Z0-9\\u00C0-\\u00FF][\\w\\u00C0-\\u00FF'.\\-]*\\s*)+Airport).*/)[0]"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "Airport",
+          "expression": "isNull(value)",
+          "columnName": "Airport",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": true,
+                "l": "true"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Airport",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          ""
+        ],
+        "fromBlank": true,
+        "fromError": false,
+        "to": "Shenzhen Bao’an Airport"
+      }
+    ],
+    "description": "Mass edit cells in column Airport"
   },
   {
     "op": "core/mass-edit",
@@ -69,12 +109,321 @@
     "edits": [
       {
         "from": [
+          "Shenzhen Bao’an Airport",
+          "Shenzhen Bao'An Airport",
+          "Shenzhen Bao'an Airport",
+          "Shenzhen Baoan Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Shenzhen Bao’an Airport"
+      },
+      {
+        "from": [
+          "O.R. Tambo International Airport",
+          "OR Tambo International Airport",
+          "O.R Tambo International Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "O.R. Tambo International Airport"
+      },
+      {
+        "from": [
+          "Mérida International Airport",
+          "Merida International Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Mérida International Airport"
+      }
+    ],
+    "description": "Mass edit cells in column Airport"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Airport",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Amsterdam Schiphol Airport",
+          "Amsterdam-Schiphol Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Amsterdam Schiphol Airport"
+      },
+      {
+        "from": [
+          "Soekarno Hatta Airport",
+          "Soekarno-Hatta Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Soekarno Hatta Airport"
+      },
+      {
+        "from": [
           "Tan Son Nhat International Airport",
           "Tan Son Nha International Airport"
         ],
         "fromBlank": false,
         "fromError": false,
         "to": "Tan Son Nhat International Airport"
+      },
+      {
+        "from": [
+          "Soekarno-Hatta International Airport",
+          "Soekarno Hatta International Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Soekarno-Hatta International Airport"
+      }
+    ],
+    "description": "Mass edit cells in column Airport"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "text",
+          "name": "Airport",
+          "columnName": "Airport",
+          "query": "Beijing Capital",
+          "mode": "text",
+          "caseSensitive": true,
+          "invert": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Airport",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Beijing Capital International Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Beijing Capital Airport"
+      }
+    ],
+    "description": "Mass edit cells in column Airport"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "text",
+          "name": "Airport",
+          "columnName": "Airport",
+          "query": "Kunming Changshui",
+          "mode": "text",
+          "caseSensitive": true,
+          "invert": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Airport",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Kunming Changshui Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Kunming Changshui Airport"
+      }
+    ],
+    "description": "Mass edit cells in column Airport"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "text",
+          "name": "Airport",
+          "columnName": "Airport",
+          "query": "Kunming Changshui",
+          "mode": "text",
+          "caseSensitive": true,
+          "invert": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Airport",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Kunming Changshui International Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Kunming Changshui Airport"
+      }
+    ],
+    "description": "Mass edit cells in column Airport"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "text",
+          "name": "Airport",
+          "columnName": "Airport",
+          "query": "Lanzhou Zhongchuan",
+          "mode": "text",
+          "caseSensitive": true,
+          "invert": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Airport",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Lanzhou Zhongchuan International Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Lanzhou Zhongchuan Airport"
+      }
+    ],
+    "description": "Mass edit cells in column Airport"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "text",
+          "name": "Airport",
+          "columnName": "Airport",
+          "query": "Hangzhou Xiaoshan",
+          "mode": "text",
+          "caseSensitive": true,
+          "invert": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Airport",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Hangzhou Xiaoshan International Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Hangzhou Xiaoshan Airport"
+      }
+    ],
+    "description": "Mass edit cells in column Airport"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "text",
+          "name": "Airport",
+          "columnName": "Airport",
+          "query": "Shenyang Tao",
+          "mode": "text",
+          "caseSensitive": true,
+          "invert": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Airport",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Shenyang Taoxin International Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Shenyang Taoxian Airport"
+      }
+    ],
+    "description": "Mass edit cells in column Airport"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "text",
+          "name": "Airport",
+          "columnName": "Airport",
+          "query": "Shenyang Tao",
+          "mode": "text",
+          "caseSensitive": true,
+          "invert": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Airport",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Shenyang Taoxian International Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Shenyang Taoxian Airport"
+      }
+    ],
+    "description": "Mass edit cells in column Airport"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "text",
+          "name": "Airport",
+          "columnName": "Airport",
+          "query": "Bangkok Su",
+          "mode": "text",
+          "caseSensitive": true,
+          "invert": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Airport",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Bangkok Suvarnabhumi Airport"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Bangkok Suvarnbhumi Airport"
       }
     ],
     "description": "Mass edit cells in column Airport"

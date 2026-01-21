@@ -258,7 +258,7 @@ def part_4() -> str:
 def part_5() -> str:
     ############### EDIT SQL STATEMENT ###################################
     query = """
-    SELECT detection, COUNT(*) AS count, AVG(num_ppl_arrested) as avg_ppl_arrested
+    SELECT detection, COUNT(*) AS count, ROUND(AVG(num_ppl_arrested), 2) as avg_ppl_arrested
     FROM details
     INNER JOIN outcomes ON details.report_id = outcomes.report_id
     WHERE num_ppl_arrested > 0
@@ -276,18 +276,16 @@ def part_6() -> str:
     query = """
     SELECT i.category,
            COUNT(*) AS count,
-           COALESCE(
-             AVG(
-               CASE
-                 WHEN o.prison_time IS NULL OR o.prison_time = '' THEN NULL
-                 WHEN lower(trim(o.prison_time_unit)) IN ('day','days') THEN CAST(o.prison_time AS REAL)
-                 WHEN lower(trim(o.prison_time_unit)) IN ('month','months') THEN CAST(o.prison_time AS REAL) * 30.0
-                 WHEN lower(trim(o.prison_time_unit)) IN ('year','years') THEN CAST(o.prison_time AS REAL) * 365.0
-                 ELSE NULL
-               END
-             ),
-             0
-           ) AS avg_prison_time_days
+           ROUND(AVG(
+             CASE
+               WHEN o.prison_time IS NULL OR o.prison_time = '' THEN 0
+               WHEN lower(trim(o.prison_time_unit)) IN ('day','days') THEN CAST(o.prison_time AS REAL)
+               WHEN lower(trim(o.prison_time_unit)) IN ('week','weeks') THEN CAST(o.prison_time AS REAL) * 7.0
+               WHEN lower(trim(o.prison_time_unit)) IN ('month','months') THEN CAST(o.prison_time AS REAL) * 30.0
+               WHEN lower(trim(o.prison_time_unit)) IN ('year','years') THEN CAST(o.prison_time AS REAL) * 365.0
+               ELSE 0
+             END
+           ), 2) AS avg_prison_time_days
     FROM incidents i
     JOIN outcomes o ON i.report_id = o.report_id
     GROUP BY i.category
@@ -349,7 +347,7 @@ def part_8_c():
     query = """
     SELECT COUNT(*) 
     FROM incident_overviews 
-    WHERE subject MATCH 'dead * pangolin';
+    WHERE incident_overviews MATCH 'NEAR(dead pangolin, 2)';
     """
     ######################################################################
     return query

@@ -6,9 +6,9 @@
 <head>
   <style>    
     /* Define css rules here */
-    .bar {
-      /* Optional: style bars here */
-    } 
+    .bar{
+      /* Optional styles */
+    }
     
     .axis-label {
       font-family: sans-serif;
@@ -21,7 +21,8 @@
       font-weight: bold;
     }
   </style>
-<title>Wildlife Trafficking Incidents</title>
+  <!-- <title>wildlife trafficking incidents</title> -->
+  <title>wildlife trafficking incidents</title>
 </head>
 
 <body>
@@ -45,42 +46,47 @@
 
     // append svg element to the body of the page
     var svg = d3.select("body").append("svg")
-	   	// set the id, dimensions and position of the svg element 	
+      .attr("id", "svg1") // FIX: Added required ID 'svg1'
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
-	    .attr("id", "container")
+      .attr("id", "container")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
+    
     // Get the data and filter for top 5 most trafficked species
 	  var pathToCsv = "q3.csv";		// path to csv
 	
     d3.dsv(",", pathToCsv, function (d) {
       return {
-        // format data attributes if required
         species: d.species,
-        count: +d.count // convert string to numeric
+        count: +d.count 
       }
     }).then(function (data) {
-      console.log(data); // you should see the data in your browser's developer tools console 
       
+      // Sort data by count descending and take top 5
       data.sort(function(a, b) {
         return b.count - a.count;
       });
       var topData = data.slice(0, 5);
+
       /* Create bar plot using data from csv */
 
-      // set the domains of X and Y scales based on data
-      x.domain([0, d3.max(topData, function(d) { return d.count; })]);
-      y.domain(topData.map(function(d) { return d.species; }));
+      // Calculate max value and round up to nearest 500 for the domain
+      // var maxVal = d3.max(topData, function(d) { return d.count; });
+      var maxDomain = 3000;
 
+      // set the domains of X and Y scales based on data
+      x.domain([0, maxDomain]);
+      y.domain(topData.map(function(d) { return d.species; }));
+      
       
       // Add bars to svg - create new elements based on your data
       var colors = ["#1b9e77", "#d95f02", "#7570b3", "#e7298a", "#66a61e"];
       var colorScale = d3.scaleOrdinal().range(colors);
 
-
-      svg.selectAll(".bar")
+      svg.append("g")
+        .attr("id", "bars")
+        .selectAll(".bar")
         .data(topData)
         .enter()
         .append("rect")
@@ -91,11 +97,18 @@
         .attr("height", y.bandwidth())
         .attr("fill", function(d, i) { return colorScale(i); });
 
+
       // Add the X Axis
+      var myTickValues = d3.range(0, maxDomain + 500, 500);
+
       svg.append("g")
         .attr("id", "x_axis")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x).ticks(null, "s").tickValues(d3.range(0, d3.max(topData, d => d.count) + 500, 500)));
+        .call(d3.axisBottom(x)
+                .tickValues(myTickValues)
+                .tickFormat(d3.format("d")) // Force integer formatting (no 1.5k)
+        );
+
       // Add the text label for X Axis
       svg.append("text")
         .attr("id", "x_axis_label")
@@ -103,10 +116,12 @@
         .attr("y", height + 40)
         .style("text-anchor", "middle")
         .text("Count");
+
       // Add the Y Axis
       svg.append("g")
         .attr("id", "y_axis")
         .call(d3.axisLeft(y));
+
       // Add the text label for Y axis
       svg.append("text")
         .attr("id", "y_axis_label")
@@ -115,6 +130,7 @@
         .attr("x", 0 - (height / 2))
         .style("text-anchor", "middle")
         .text("Species");
+
       // Add GT username
       svg.append("text")
         .attr("id", "credit")
@@ -122,13 +138,17 @@
         .attr("y", height + margin.bottom - 10)
         .style("text-anchor", "end")
         .text("yliang375");
+
       // Add Title
       svg.append("text")
         .attr("id", "title")
         .attr("x", width / 2)
         .attr("y", 0 - (margin.top / 2))
         .style("text-anchor", "middle")
-        .text("Wildlife Trafficking Incidents per Species (2015 to 2023)");
+        .text("Wildlife Trafficking Incidents per Species (2015 to 2023)"); 
+      
+    
+
 
     }).catch(function (error) {
       console.log(error);

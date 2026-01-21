@@ -4,6 +4,7 @@ import csv
 import http.client
 import ssl
 import certifi
+# import time
 
 
 
@@ -66,6 +67,7 @@ class Graph:
         The graph should not contain any duplicate nodes
         """
         id = str(id)
+        # Check if node exists (using ID only)
         if id not in [node[0] for node in self.nodes]:
             self.nodes.append((id, name))
         # return NotImplemented
@@ -80,9 +82,9 @@ class Graph:
         """
         source = str(source)
         target = str(target)
+        # Check if edge exists (undirected)
         if (source, target) not in self.edges and (target, source) not in self.edges:
             self.edges.append((source, target))
-        # return NotImplemented
 
 
     def total_nodes(self) -> int:
@@ -111,8 +113,11 @@ class Graph:
         for source, target in self.edges:
             degree_count[source] = degree_count.get(source, 0) + 1
             degree_count[target] = degree_count.get(target, 0) + 1
+        
+        if not degree_count:
+            return {}
 
-        max_degree = max(degree_count.values(), default=0)
+        max_degree = max(degree_count.values())
         return {node: degree for node, degree in degree_count.items() if degree == max_degree}
 
 
@@ -209,19 +214,23 @@ class  TMDBAPIUtils:
         # conn.close()
         ctx = ssl.create_default_context(cafile=certifi.where())
         conn = http.client.HTTPSConnection("api.themoviedb.org", context=ctx)
-        params = f"?api_key={self.api_key}&language=en-US"
+        # params = f"?api_key={self.api_key}&language=en-US"
         
-        conn.request("GET", f"/3/movie/{movie_id}/credits{params}")
+        conn.request("GET", f"/3/movie/{movie_id}/credits?api_key={self.api_key}&language=en-US")
         res = conn.getresponse()
         data = res.read()
         conn.close()
 
         if res.status == 200:
-            cast = json.loads(data)["cast"]
+            cast = json.loads(data).get("cast", [])
+            # Apply Limit FIRST (based on 'order')
+            if limit is not None:
+                cast = cast[:limit]
+                
+            # Apply Exclusion SECOND
             if exclude_ids is not None:
                 cast = [m for m in cast if m["id"] not in exclude_ids]
-            if limit is not None:
-                return cast[:limit]
+            
             return cast
         return []
 
@@ -252,21 +261,33 @@ class  TMDBAPIUtils:
         
         ctx = ssl.create_default_context(cafile=certifi.where())
         conn = http.client.HTTPSConnection("api.themoviedb.org", context=ctx)
+        # params = f"?api_key={self.api_key}&language=en-US"
 
-        params = f"?api_key={self.api_key}&language=en-US"
-
-        if start_date:
-            params += f"&release_date.gte={start_date}"
-        if end_date:
-            params += f"&release_date.lte={end_date}"
-        
-        conn.request("GET", f"/3/person/{person_id}/movie_credits{params}")
+        conn.request("GET", f"/3/person/{person_id}/movie_credits?api_key={self.api_key}&language=en-US")
         res = conn.getresponse()
         data = res.read()
         conn.close()
 
         if res.status == 200:
-            return json.loads(data)["cast"]
+            all_credits = json.loads(data).get("cast", [])
+
+            # Filter by date MANUALLY in Python
+            filtered_credits = []
+            for credit in all_credits:
+                release_date = credit.get("release_date", "")
+                if not release_date:
+                    continue # Skip entries with no date
+                
+                # String comparison works for YYYY-MM-DD
+                if start_date and release_date < start_date:
+                    continue
+                if end_date and release_date > end_date:
+                    continue
+                
+                filtered_credits.append(credit)
+            
+            return filtered_credits
+
         return []
 
 
@@ -380,24 +401,70 @@ if __name__ == "__main__":
 
     # call functions or place code here to build graph (graph building code not graded)
     # Suggestion: code should contain steps outlined above in BUILD CO-ACTOR NETWORK
-    actors_to_process = ['2975']  # Start with Laurence Fishburne
+     # Get Fishburne's 1999 movies
+    
+    credits = tmdb_api_utils.get_movie_credits_for_person('2975', start_date='1999-01-01', end_date='1999-12-31')
+    # --- STEP 1: BUILD BASE GRAPH (Laurence Fishburne) ---
+    # We track 'next_layer_actors' to know who to expand in the next step
+    next_layer_actors = []
+    
+    for credit in credits:
+        # Get top 5 cast, excluding Fishburne himself
+        cast = tmdb_api_utils.get_movie_cast(credit['id'], limit=5, exclude_ids=[2975])
+        
+        for member in cast:
+            actor_id = str(member['id'])
+            actor_name = member['name'].replace(",", "") # Remove commas
+            
+            # Check if this is a NEW node before adding
+            is_new_node = True
+            for n in graph.nodes:
+                if n[0] == actor_id:
+                    is_new_node = False
+                    break
+            
+            graph.add_node(actor_id, actor_name)
+            graph.add_edge('2975', actor_id)
+            
+            if is_new_node:
+                next_layer_actors.append(actor_id)
 
-    for _ in range(2):  # Perform this operation twice
-        new_actors = []
-        for actor_id in actors_to_process:
-            movie_credits = tmdb_api_utils.get_movie_credits_for_person(actor_id)
-            for credit in movie_credits:
-                if credit["release_date"].startswith("1999"):
-                    movie_cast = tmdb_api_utils.get_movie_cast(credit["id"], limit=5)
-                    for member in movie_cast:
-                        co_actor_id = member['id']
-                        co_actor_name = member['name'].replace(",", "")  # Remove commas
-                        graph.add_node(co_actor_id, co_actor_name)  # Add co-actor node
-                        graph.add_edge(actor_id, co_actor_id)  # Connect co-actor with Laurence Fishburne
-                        new_actors.append(co_actor_id)  # Track new actors added
+    # --- STEP 2: LOOP 2 TIMES (Expand the Network) ---
+    actors_to_process = next_layer_actors
+    
+    for i in range(2):
+        newly_found_actors = []
+        print(f"Loop {i+1}: Processing {len(actors_to_process)} actors...")
+        
+        for source_id in actors_to_process:
 
-        actors_to_process = new_actors  # Use new actors for the next iteration
-
+            # # Sleep for 200ms to be kind to the API
+            # time.sleep(0.2) 
+            # Get 1999 credits for this co-actor
+            credits = tmdb_api_utils.get_movie_credits_for_person(source_id, start_date='1999-01-01', end_date='1999-12-31')
+            
+            for credit in credits:
+                # Get top 5 cast, exclude the SOURCE actor
+                cast = tmdb_api_utils.get_movie_cast(credit['id'], limit=5, exclude_ids=[int(source_id)])
+                
+                for member in cast:
+                    target_id = str(member['id'])
+                    target_name = member['name'].replace(",", "")
+                    
+                    is_new_node = True
+                    for n in graph.nodes:
+                        if n[0] == target_id:
+                            is_new_node = False
+                            break
+                    
+                    graph.add_node(target_id, target_name)
+                    graph.add_edge(source_id, target_id)
+                    
+                    if is_new_node:
+                        newly_found_actors.append(target_id)
+        
+        # Update list for next iteration
+        actors_to_process = newly_found_actors
 
     graph.write_edges_file()
     graph.write_nodes_file()
